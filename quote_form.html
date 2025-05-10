@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kandhan Travels - Quote Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .form-section h2 {
+            color: #0061D5;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .form-actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 0 10px;
+        }
+        .reset-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+        .generate-btn {
+            background-color: #0061D5;
+            color: white;
+        }
+        .btn {
+            background-color: #28a745;
+            color: white;
+            margin-bottom: 20px;
+        }
+        .itinerary-day {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+        <div class="header-text">
+            <h1 style="margin:0;">Kandhan Travels - Quote Generator</h1>
+        </div>
+        <a href="file.html" style="background-color:#3563E9; color:white; border:none; padding:10px 22px; border-radius:8px; font-weight:600; font-size:15px; text-decoration:none;">Invoice</a>
+    </div>
+    <div class="container">
+        <div class="header">
+            <div class="header-text">
+                <h1>Kandhan Travels - Quote Generator</h1>
+                <p>Fill in the details to generate a travel quotation</p>
+            </div>
+        </div>
+        <div class="form-container">
+            <form id="quoteForm">
+                <div class="form-section">
+                    <h2>Client Details</h2>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label for="clientName">Full Name</label>
+                            <input type="text" id="clientName">
+                        </div>
+                        <div class="input-group">
+                            <label for="clientContact">Contact Number</label>
+                            <input type="tel" id="clientContact">
+                        </div>
+                        <div class="input-group">
+                            <label for="clientEmail">Email Address</label>
+                            <input type="email" id="clientEmail">
+                        </div>
+                        <div class="input-group">
+                            <label for="clientAddress">Address</label>
+                            <input type="text" id="clientAddress">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-section">
+                    <h2>Trip Details</h2>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label for="quoteNumber">Quote Number</label>
+                            <input type="text" id="quoteNumber" value="KT-2025-">
+                        </div>
+                        <div class="input-group">
+                            <label for="startDate">Start Date</label>
+                            <input type="date" id="startDate">
+                        </div>
+                        <div class="input-group">
+                            <label for="endDate">End Date</label>
+                            <input type="date" id="endDate">
+                        </div>
+                        <div class="input-group">
+                            <label for="adults">Number of Adults</label>
+                            <input type="number" id="adults" min="1" value="2">
+                        </div>
+                        <div class="input-group">
+                            <label for="acType">AC/Non-AC</label>
+                            <select id="acType">
+                                <option value="AC">AC</option>
+                                <option value="Non-AC">Non-AC</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="vehicle">Vehicle Type</label>
+                            <select id="vehicle" multiple size="4">
+                                <option value="Toyota Innova (AC)">Toyota Innova (AC)</option>
+                                <option value="Toyota Crysta (AC)">Toyota Crysta (AC)</option>
+                                <option value="Tempo Traveller (AC)">Tempo Traveller (AC)</option>
+                                <option value="Tempo Traveller (Non-AC)">Tempo Traveller (Non-AC)</option>
+                                <option value="Bus (40 Seater)">Bus (40 Seater)</option>
+                                <option value="Mini Bus (20 Seater)">Mini Bus (20 Seater)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-section">
+                    <h2>Itinerary</h2>
+                    <div id="itineraryContainer" class="itinerary-container">
+                        <!-- Days will be added here dynamically -->
+                    </div>
+                    <button type="button" class="btn btn-outline" id="addDayBtn">+ Add Day</button>
+                </div>
+                <div class="form-section">
+                    <h2>Pricing Details</h2>
+                    <table class="pricing-table">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th>Amount (₹)</th>
+                                <th width="50px"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="pricingTableBody">
+                            <!-- Pricing rows will be added here -->
+                        </tbody>
+                    </table>
+                    <button type="button" class="btn btn-outline" id="addPriceRowBtn">+ Add Price Item</button>
+                    <div class="form-grid" style="margin-top: 20px;">
+                        <div class="input-group">
+                            <label for="gstPercentage">GST Percentage (%)</label>
+                            <input type="number" id="gstPercentage" name="gstPercentage" value="5" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="totalCost">Total Cost (₹)</label>
+                            <input type="text" id="totalCost" name="totalCost" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-section">
+                    <h2>Inclusions</h2>
+                    <textarea id="inclusionsText" rows="4" placeholder="Enter each inclusion on a new line..."></textarea>
+                </div>
+                <div class="form-section">
+                    <h2>Exclusions</h2>
+                    <textarea id="exclusionsText" rows="4" placeholder="Enter each exclusion on a new line..."></textarea>
+                </div>
+                <div class="form-section">
+                    <h2>Terms & Conditions</h2>
+                    <textarea id="termsConditions" rows="4">50% advance payment required to confirm booking.
+Balance payment to be made before trip starts.
+Check-in time is 12 PM and check-out time is 10 AM.</textarea>
+                </div>
+                <div class="actions">
+                    <button type="button" class="btn btn-outline" id="resetFormBtn">Reset Form</button>
+                    <button type="submit" class="btn btn-primary submit-btn" id="generateQuoteBtn">
+                        Generate Quote
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+    // Itinerary dynamic days with title and description
+    let dayCount = 0;
+    function addItineraryDay(title = '', desc = '') {
+        dayCount++;
+        const container = document.getElementById('itineraryContainer');
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'day-container';
+        dayDiv.innerHTML = `
+            <div class="day-header">
+                <span class="day-number">Day ${dayCount}</span>
+                <button type="button" class="btn btn-danger" onclick="this.closest('.day-container').remove();">Remove</button>
+            </div>
+            <div class="input-group">
+                <label>Title</label>
+                <input type="text" name="dayTitle${dayCount}" value="${title}">
+            </div>
+            <div class="input-group">
+                <label>Description</label>
+                <textarea name="dayDesc${dayCount}" rows="2">${desc}</textarea>
+            </div>
+        `;
+        container.appendChild(dayDiv);
+    }
+    document.getElementById('addDayBtn').onclick = () => addItineraryDay();
+    // Add first day by default
+    addItineraryDay();
+    // Pricing table dynamic rows
+    function updateTotalCost() {
+        let sum = 0;
+        document.querySelectorAll('.price-amount').forEach(input => {
+            sum += parseFloat(input.value) || 0;
+        });
+        const gst = parseFloat(document.getElementById('gstPercentage').value) || 0;
+        sum += sum * gst / 100;
+        document.getElementById('totalCost').value = sum.toLocaleString('en-IN', { style: 'currency', currency: 'INR' });
+    }
+    function addPriceRow(desc = '', amt = '') {
+        const tbody = document.getElementById('pricingTableBody');
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><input type="text" class="price-desc" value="${desc}" required></td>
+            <td><input type="number" class="price-amount" value="${amt}" required></td>
+            <td><button type="button" class="btn btn-danger" onclick="this.closest('tr').remove(); updateTotalCost();">Remove</button></td>
+        `;
+        tbody.appendChild(tr);
+        tr.querySelector('.price-amount').addEventListener('input', updateTotalCost);
+        tr.querySelector('.price-desc').addEventListener('input', updateTotalCost);
+        updateTotalCost();
+    }
+    document.getElementById('addPriceRowBtn').onclick = () => addPriceRow();
+    addPriceRow('Base Fare', '');
+    document.getElementById('gstPercentage').addEventListener('input', updateTotalCost);
+    // Reset form
+    document.getElementById('resetFormBtn').onclick = function() {
+        document.getElementById('quoteForm').reset();
+        document.getElementById('itineraryContainer').innerHTML = '';
+        dayCount = 0;
+        addItineraryDay();
+        document.getElementById('pricingTableBody').innerHTML = '';
+        addPriceRow('Base Fare', '');
+        updateTotalCost();
+    };
+    // PDF generation on submit
+    document.getElementById('quoteForm').onsubmit = async function(e) {
+        e.preventDefault();
+        const pdfPreview = document.getElementById('pdfPreview');
+        pdfPreview.style.display = 'block';
+        // Gather data
+        const vehicleSelect = document.getElementById('vehicle');
+        const selectedVehicles = Array.from(vehicleSelect.selectedOptions).map(opt => opt.value).join(', ');
+        const acType = document.getElementById('acType').value;
+        // Fill client/trip details
+        pdfPreview.querySelector('#clientName').textContent = document.getElementById('clientName').value;
+        pdfPreview.querySelector('#clientContact').textContent = document.getElementById('clientContact').value;
+        pdfPreview.querySelector('#clientEmail').textContent = document.getElementById('clientEmail').value;
+        pdfPreview.querySelector('#clientAddress').textContent = document.getElementById('clientAddress').value;
+        pdfPreview.querySelector('#quoteNumber').textContent = document.getElementById('quoteNumber').value;
+        pdfPreview.querySelector('#fromDate').textContent = document.getElementById('startDate').value;
+        pdfPreview.querySelector('#toDate').textContent = document.getElementById('endDate').value;
+        // Duration calculation
+        const start = new Date(document.getElementById('startDate').value);
+        const end = new Date(document.getElementById('endDate').value);
+        let duration = '';
+        if (!isNaN(start) && !isNaN(end)) {
+            const diff = Math.max(1, Math.round((end - start) / (1000*60*60*24)) + 1);
+            duration = `${diff} Days / ${diff-1} Nights`;
+        }
+        pdfPreview.querySelector('#duration').textContent = duration;
+        pdfPreview.querySelector('#passengers').textContent = document.getElementById('adults').value + " Adults";
+        pdfPreview.querySelector('#vehicleType').textContent = selectedVehicles + (acType ? ' (' + acType + ')' : '');
+        // Itinerary
+        const itineraryContent = pdfPreview.querySelector('#itineraryContent');
+        itineraryContent.innerHTML = '';
+        document.querySelectorAll('#itineraryContainer .day-container').forEach((dayDiv, idx) => {
+            const title = dayDiv.querySelector('input[name^="dayTitle"]').value;
+            const desc = dayDiv.querySelector('textarea[name^="dayDesc"]').value;
+            itineraryContent.innerHTML += `<div class='itinerary-day'><div class='day-title'>${title}</div><p>${desc}</p></div>`;
+        });
+        // Pricing (simple example, you can expand)
+        pdfPreview.querySelector('#priceTableBody').innerHTML = `<tr><td>Base Fare</td><td style='text-align:right'>10000</td></tr>`;
+        pdfPreview.querySelector('#totalAmount').textContent = "₹10,000.00";
+        // Inclusions/Exclusions
+        pdfPreview.querySelector('#inclusionsList').innerHTML = document.getElementById('inclusionsText').value.split('\n').filter(x=>x.trim()).map(i=>`<div class='list-item'><div class='dot'></div><div>${i}</div></div>`).join('');
+        pdfPreview.querySelector('#exclusionsList').innerHTML = document.getElementById('exclusionsText').value.split('\n').filter(x=>x.trim()).map(i=>`<div class='list-item'><div class='dot'></div><div>${i}</div></div>`).join('');
+        pdfPreview.querySelector('#termsList').innerHTML = document.getElementById('termsConditions').value.split('\n').filter(x=>x.trim()).map(i=>`<li>${i}</li>`).join('');
+        // Generate PDF from both .page divs
+        const pages = pdfPreview.querySelectorAll('.page');
+        const pdf = new window.jspdf.jsPDF('p','mm','a4');
+        for (let i = 0; i < pages.length; i++) {
+            if (i > 0) pdf.addPage();
+            const canvas = await html2canvas(pages[i], {scale:2, backgroundColor:'#fff'});
+            const imgData = canvas.toDataURL('image/png');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        }
+        pdf.save('travel_quote.pdf');
+        pdfPreview.style.display = 'none';
+    };
+    </script>
+
+    <!-- Hidden PDF template -->
+    <div id="pdfPreview" style="display:none">
+        <style>
+            /* Reset and Base Styles */
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            :root { --primary: #0061D5; --dark: #333333; --grey: #6B7280; --light-grey: #E5E7EB; --light-bg: #F9FAFB; }
+            body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif; color: var(--dark); line-height: 1.4; font-size: 14px; background-color: white; }
+            .page { width: 210mm; min-height: 297mm; margin: 0 auto; background: white; padding: 25px 30px; position: relative; page-break-after: always; }
+            .header { display: flex; flex-direction: column; border-bottom: 2px solid var(--light-grey); margin-bottom: 25px; padding-bottom: 20px; }
+            .header-top { display: flex; align-items: center; margin-bottom: 15px; }
+            .logo-section { display: flex; align-items: center; gap: 15px; flex: 1; }
+            .company-logo { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: var(--light-bg); border-radius: 8px; flex-shrink: 0; border: 1px solid var(--light-grey); }
+            .company-name { font-weight: 700; font-size: 24px; color: var(--primary); line-height: 1.1; }
+            .company-tagline { font-size: 12px; color: var(--grey); margin-top: 4px; }
+            .header-bottom { display: flex; justify-content: space-between; margin-top: 10px; }
+            .address-section { flex: 2; display: flex; flex-direction: column; }
+            .address-item { margin-bottom: 8px; font-size: 13px; display: flex; align-items: flex-start; gap: 8px; color: var(--grey); }
+            .contact-section { flex: 1; display: flex; flex-direction: column; }
+            .contact-item { display: flex; align-items: center; gap: 8px; color: var(--grey); margin-bottom: 8px; font-size: 13px; }
+            .section { margin-bottom: 30px; }
+            .section-title { font-size: 16px; font-weight: 600; color: var(--primary); margin-bottom: 15px; padding-bottom: 8px; border-bottom: 1px solid var(--light-grey); }
+            .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 30px; }
+            .info-card { background-color: var(--light-bg); padding: 18px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+            .info-card h3 { margin-bottom: 15px; color: var(--primary); font-size: 15px; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 8px; }
+            .info-row { display: flex; margin-bottom: 10px; }
+            .info-label { font-weight: 500; width: 85px; color: var(--grey); }
+            .price-card { border: 1px solid var(--light-grey); border-radius: 8px; overflow: hidden; box-shadow: 0 3px 8px rgba(0,0,0,0.08); }
+            .price-table { width: 100%; border-collapse: collapse; }
+            .price-table th { text-align: left; padding: 12px 15px; color: white; font-weight: 600; background-color: var(--primary); }
+            .price-table td { padding: 12px 15px; border-bottom: 1px solid var(--light-grey); }
+            .total-row { font-weight: 600; color: white; background-color: var(--primary); padding: 15px; display: flex; justify-content: space-between; }
+            .inc-exc-container { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+            .list-items { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+            .list-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+            .dot { width: 6px; height: 6px; background-color: var(--primary); border-radius: 50%; }
+            .footer { position: absolute; bottom: 25px; left: 30px; right: 30px; padding-top: 15px; border-top: 1px solid var(--light-grey); display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--grey); }
+            .document-title { text-align: center; margin: 30px 0; color: var(--primary); font-size: 24px; font-weight: 700; }
+            @media print { body { background: none; } .page { margin: 0; box-shadow: none; } .section { page-break-inside: avoid; } }
+        </style>
+        <div class="page" id="page1">
+            <div class="header">
+                <div class="header-top">
+                    <div class="logo-section">
+                        <div class="company-logo">
+                            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2L3 9V20C3 20.5304 3.21071 21.0391 3.58579 21.4142C3.96086 21.7893 4.46957 22 5 22H19C19.5304 22 20.0391 21.7893 20.4142 21.4142C20.7893 21.0391 21 20.5304 21 20V9L12 2Z" stroke="#0061D5" stroke-width="2"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="company-name" id="clientCompanyName">KANDHAN TRAVELS</div>
+                            <div class="company-tagline">Your Trusted Travel Partner</div>
+                            <div class="gst-number">GST: 33ABJPK7328F1ZX</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-bottom">
+                    <div class="address-section">
+                        <div class="address-item">1. Gandhi Nagar, Mettupalayam, Coimbatore - 641301</div>
+                        <div class="address-item">2. FCI Godown Road, Ganapathy, Coimbatore - 641006</div>
+                    </div>
+                    <div class="contact-section">
+                        <div class="contact-item">+91 98765 43210</div>
+                        <div class="contact-item">sales@kandhantravels.com</div>
+                        <div class="contact-item">www.kandhantravels.com</div>
+                    </div>
+                </div>
+            </div>
+            <h1 class="document-title">TRIP QUOTATION</h1>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>CLIENT DETAILS</h3>
+                    <div class="info-row"><div class="info-label">Name:</div><div id="clientName"></div></div>
+                    <div class="info-row"><div class="info-label">Contact:</div><div id="clientContact"></div></div>
+                    <div class="info-row"><div class="info-label">Email:</div><div id="clientEmail"></div></div>
+                    <div class="info-row"><div class="info-label">Address:</div><div id="clientAddress"></div></div>
+                </div>
+                <div class="info-card">
+                    <h3>TRIP DETAILS</h3>
+                    <div class="info-row"><div class="info-label">Quote #:</div><div id="quoteNumber"></div></div>
+                    <div class="info-row"><div class="info-label">From:</div><div id="fromDate"></div></div>
+                    <div class="info-row"><div class="info-label">To:</div><div id="toDate"></div></div>
+                    <div class="info-row"><div class="info-label">Duration:</div><div id="duration"></div></div>
+                    <div class="info-row"><div class="info-label">People:</div><div id="passengers"></div></div>
+                    <div class="info-row"><div class="info-label">Vehicle:</div><div id="vehicleType"></div></div>
+                </div>
+            </div>
+            <div class="section">
+                <h2 class="section-title">ROUTE & DESTINATIONS</h2>
+                <div id="itineraryContent"></div>
+            </div>
+            <div class="footer">
+                <div>We provide vehicles from 4 to 54 seater services</div>
+                <div>Page 1 of 2</div>
+            </div>
+        </div>
+        <div class="page" id="page2">
+            <div class="header" style="border-bottom: none; margin-bottom: 40px;">
+                <div class="company-name" style="text-align: center; font-size: 20px;">KANDHAN TRAVELS - COIMBATORE</div>
+            </div>
+            <div class="section">
+                <h2 class="section-title">PRICING</h2>
+                <div class="price-card">
+                    <table class="price-table">
+                        <thead>
+                            <tr><th>Description</th><th style="text-align: right;">Amount</th></tr>
+                        </thead>
+                        <tbody id="priceTableBody"></tbody>
+                    </table>
+                    <div class="total-row"><div>TOTAL COST:</div><div id="totalAmount"></div></div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="inc-exc-container">
+                    <div>
+                        <h2 class="section-title">INCLUSIONS</h2>
+                        <div class="list-items" id="inclusionsList"></div>
+                    </div>
+                    <div>
+                        <h2 class="section-title">EXCLUSIONS</h2>
+                        <div class="list-items" id="exclusionsList"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <h2 class="section-title">TERMS & CONDITIONS</h2>
+                <ul class="terms-list" id="termsList"></ul>
+            </div>
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="mailto:sales@kandhantravels.com" class="action-button">CONFIRM BOOKING</a>
+            </div>
+            <div class="footer">
+                <div>© 2025 Kandhan Travels. All rights reserved.</div>
+                <div>For enquiries: +91 98765 43210 | sales@kandhantravels.com</div>
+                <div>Page 2 of 2</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

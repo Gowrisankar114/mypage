@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kandhan Travels - Premium Invoice Generator</title>
+    <style>
+        :root {
+            --primary-color: #3563E9;
+            --primary-light: #EDF2FF;
+            --secondary-color: #5E97FF;
+            --text-primary: #1A202C;
+            --text-secondary: #4A5568;
+            --text-light: #718096;
+            --border-color: #E2E8F0;
+            --success-color: #10B981;
+            --warning-color: #F59E0B;
+            --background-color: #FFFFFF;
+            --background-alt: #F7FAFC;
+            --a4-width: 210mm;
+            --a4-height: 297mm;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-primary);
+        }
+
+        .controls {
+            background-color: var(--background-color);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .control-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .download-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 15px;
+            transition: background-color 0.2s;
+            width: 100%;
+        }
+
+        .download-btn:hover {
+            background-color: #2854d8;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-col {
+            flex: 1;
+        }
+
+        .form-section {
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .form-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .invoice-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .remove-item {
+            background-color: #FF5A5A;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .add-item {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .add-item:hover {
+            background-color: #2854d8;
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234A5568' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 30px;
+        }
+
+        /* Total Summary Box */
+        .total-summary {
+            background-color: var(--primary-light);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .total-summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+        }
+
+        .total-summary-label {
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .total-summary-amount {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .total-summary-total {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary-color);
+            border-top: 1px solid rgba(0,0,0,0.1);
+            padding-top: 10px;
+            margin-top: 5px;
+        }
+
+        .bank-info {
+            background-color: var(--background-alt);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .bank-info-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .bank-info-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+
+        .bank-info-label {
+            font-weight: 500;
+            min-width: 120px;
+            color: var(--text-secondary);
+        }
+
+        .bank-info-value {
+            color: var(--text-primary);
+        }
+
+        @media print {
+            .controls {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+        <div class="control-title">Kandhan Travels - Invoice Generator</div>
+        <a href="quote_form.html" style="background-color:#5E97FF; color:white; border:none; padding:10px 22px; border-radius:8px; font-weight:600; font-size:15px; text-decoration:none;">QUOTATION</a>
+    </div>
+    <div class="controls">
+        <div class="control-title">Kandhan Travels - Invoice Generator</div>
+        
+        <div class="form-section">
+            <div class="form-section-title">Customer Information</div>
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="customerName">Customer Name</label>
+                        <input type="text" class="form-control" id="customerName" value="Ramesh Kumar">
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="customerPhone">Customer Phone</label>
+                        <input type="text" class="form-control" id="customerPhone" value="+91 99887 65432">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="customerAddress">Customer Address</label>
+                <input type="text" class="form-control" id="customerAddress" value="123 Main Street, Coimbatore, TN">
+            </div>
+            <div class="form-group">
+                <label for="customerEmail">Customer Email</label>
+                <input type="email" class="form-control" id="customerEmail" value="ramesh@example.com">
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <div class="form-section-title">Invoice Details</div>
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="invoiceNumber">Invoice Number</label>
+                        <input type="text" class="form-control" id="invoiceNumber" value="INV-KT-2025050001">
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="invoiceDate">Invoice Date</label>
+                        <input type="text" class="form-control" id="invoiceDate" value="May 9, 2025">
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="tripDate">Trip Date</label>
+                        <input type="text" class="form-control" id="tripDate" value="May 8-9, 2025">
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="paymentStatus">Payment Status</label>
+                        <select class="form-control" id="paymentStatus">
+                            <option value="PAID">PAID</option>
+                            <option value="UNPAID">UNPAID</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <div class="form-section-title">Vehicle Information</div>
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="vehicleType">Vehicle Type</label>
+                        <input type="text" class="form-control" id="vehicleType" value="Toyota Innova">
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="vehicleSeats">Seats</label>
+                        <input type="text" class="form-control" id="vehicleSeats" value="7+1">
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="vehicleAC">AC/Non-AC</label>
+                        <select class="form-control" id="vehicleAC">
+                            <option value="AC">AC</option>
+                            <option value="Non-AC">Non-AC</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <div class="form-section-title">Invoice Items</div>
+            <div id="invoiceItems">
+                <div class="invoice-item" data-id="1">
+                    <div style="flex: 3">
+                        <div class="form-group">
+                            <label>Description</label>
+                            <input type="text" class="form-control item-desc" value="Vehicle Charges">
+                        </div>
+                    </div>
+                    <div style="flex: 2">
+                        <div class="form-group">
+                            <label>Details</label>
+                            <input type="text" class="form-control item-details" value="280 km @ ₹16/km">
+                        </div>
+                    </div>
+                    <div style="flex: 1">
+                        <div class="form-group">
+                            <label>Rate (₹)</label>
+                            <input type="number" class="form-control item-rate" value="16.00" oninput="calculateItemAmount(this)">
+                        </div>
+                    </div>
+                    <div style="flex: 1">
+                        <div class="form-group">
+                            <label>Quantity</label>
+                            <input type="number" class="form-control item-quantity" value="280" oninput="calculateItemAmount(this)">
+                        </div>
+                    </div>
+                    <div style="flex: 1">
+                        <div class="form-group">
+                            <label>Amount (₹)</label>
+                            <input type="number" class="form-control item-amount" value="4480.00" readonly>
+                        </div>
+                    </div>
+                    <button class="remove-item">×</button>
+                </div>
+                
+                <div class="invoice-item" data-id="2">
+                    <div style="flex: 3">
+                        <div class="form-group">
+                            <label>Description</label>
+                            <input type="text" class="form-control item-desc" value="Driver Allowance">
+                        </div>
+                    </div>
+                    <div style="flex: 2">
+                        <div class="form-group">
+                            <label>Details</label>
+                            <input type="text" class="form-control item-details" value="1 Day @ ₹500/day">
+                        </div>
+                    </div>
+                    <div style="flex: 1">
+                        <div class="form-group">
+                            <label>Rate (₹)</label>
+                            <input type="number" class="form-control item-rate" value="500.00" oninput="calculateItemAmount(this)">
+                        </div>
+                    </div>
+                    <div style="flex: 1">
+                        <div class="form-group">
+                            <label>Quantity</label>
+                            <input type="number" class="form-control item-quantity" value="1" oninput="calculateItemAmount(this)">
+                        </div>
+                    </div>
+                    <div style="flex: 1">
+                        <div class="form-group">
+                            <label>Amount (₹)</label>
+                            <input type="number" class="form-control item-amount" value="500.00" readonly>
+                        </div>
+                    </div>
+                    <button class="remove-item">×</button>
+                </div>
+                
+                <div class="invoice-item" data-id="3">
+                    <div style="flex: 3">
+                        <div class="form-group">
+                            <label>Description</label>
+                            <input type="text" class="form-control item-desc" value="Night Halt Charges">
+                        </div>
+                    </div>
+                    <div style="flex: 2">
+                        <div class="form-group">
+                            <label>Details</label>
+                            <input type="text" class="form-control item-details" value="1 Night @ ₹300/night">
+                        </div>
+                    </div>
+                    <div style="flex: 1">
+                        <div class="form-group">
+                            <label>Rate (₹)</label>
+                            <input type="number" class="form-control item-rate" value="300.00" oninput="calculateItemAmount(this)">
+                        </div>
+                    </div>
+                    <div style="flex: 1">
+                        <div class="form-group">
+                            <label>Quantity</label>
+                            <input type="number" class="form-control item-quantity" value="1" oninput="calculateItemAmount(this)">
+                        </div>
+                    </div>
+                    <div style="flex: 1">
+                        <div class="form-group">
+                            <label>Amount (₹)</label>
+                            <input type="number" class="form-control item-amount" value="300.00" readonly>
+                        </div>
+                    </div>
+                    <button class="remove-item">×</button>
+                </div>
+                
+                <div class="invoice-item" data-id="4">
+                    <div style="flex: 3">
+                        <div class="form-group">
+                            <label>Description</label>
+                            <input type="text" class="form-control item-desc" value="Toll & Parking Charges">
+                        </div>
+                    </div>
+                    <div style="flex: 2">
+                        <div class="form-group">
+                            <label>Details</label>
+                            <input type="text" class="form-control item-details" value="As per actual">
+                        </div>
+                    </div>
+                    <div style="flex: 1">
+                        <div class="form-group">
+                            <label>Rate (₹)</label>
+                            <input type="number" class="form-control item-rate" value="0.00" oninput="calculateItemAmount(this)">
+                        </div>
+                    </div>
+                    <div style="flex: 1">
+                        <div class="form-group">
+                            <label>Quantity</label>
+                            <input type="number" class="form-control item-quantity" value="0" oninput="calculateItemAmount(this)">
+                        </div>
+                    </div>
+                    <div style="flex: 1">
+                        <div class="form-group">
+                            <label>Amount (₹)</label>
+                            <input type="number" class="form-control item-amount" value="320.00">
+                        </div>
+                    </div>
+                    <button class="remove-item">×</button>
+                </div>
+            </div>
+            
+            <button id="addItem" class="add-item">+ Add Item</button>
+            
+            <div class="form-row" style="margin-top: 15px;">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="cgstRate">CGST Rate (%)</label>
+                        <input type="number" step="0.01" class="form-control" id="cgstRate" value="2.5" oninput="calculateTotals()">
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="sgstRate">SGST Rate (%)</label>
+                        <input type="number" step="0.01" class="form-control" id="sgstRate" value="2.5" oninput="calculateTotals()">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="total-summary">
+                <div class="total-summary-row">
+                    <div class="total-summary-label">Subtotal:</div>
+                    <div class="total-summary-amount" id="summary-subtotal">₹5,600.00</div>
+                </div>
+                <div class="total-summary-row">
+                    <div class="total-summary-label">CGST (2.5%):</div>
+                    <div class="total-summary-amount" id="summary-cgst">₹140.00</div>
+                </div>
+                <div class="total-summary-row">
+                    <div class="total-summary-label">SGST (2.5%):</div>
+                    <div class="total-summary-amount" id="summary-sgst">₹140.00</div>
+                </div>
+                <div class="total-summary-row">
+                    <div class="total-summary-label total-summary-total">TOTAL:</div>
+                    <div class="total-summary-amount total-summary-total" id="summary-total">₹5,880.00</div>
+                </div>
+                <div style="margin-top: 10px; font-style: italic; font-size: 13px; color: var(--text-secondary);">
+                    Amount in words: <span id="amount-in-words">Rupees Five Thousand Eight Hundred Eighty Only</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <div class="form-section-title">Bank Details</div>
+            <div class="bank-info">
+                <div class="bank-info-title">Payment Information</div>
+                <div class="bank-info-row">
+                    <div class="bank-info-label">Bank Name:</div>
+                    <div class="bank-info-value">ICICI Bank</div>
+                </div>
+                <div class="bank-info-row">
+                    <div class="bank-info-label">Account Name:</div>
+                    <div class="bank-info-value">Kandhan Travels</div>
+                </div>
+                <div class="bank-info-row">
+                    <div class="bank-info-label">Account Number:</div>
+                    <div class="bank-info-value">123456789012</div>
+                </div>
+                <div class="bank-info-row">
+                    <div class="bank-info-label">IFSC Code:</div>
+                    <div class="bank-info-value">ICIC0001234</div>
+                </div>
+                <div class="bank-info-row">
+                    <div class="bank-info-label">Branch:</div>
+                    <div class="bank-info-value">Coimbatore Main</div>
+                </div>
+            </div>
+        </div>
+        
+        <button id="downloadInvoice" class="download-btn">Generate and Download Invoice</button>
+    </div>
+
+    <!-- Hidden invoice template for PDF generation -->
+    <div id="invoicePage" style="display: none;">
+        <div style="width: 210mm; min-height: 297mm; background-color: #FFFFFF; padding: 0; position: relative; overflow: hidden;">
+            <div style="height: 10px; background: linear-gradient(90deg, #3563E9, #5E97FF); width: 100%;"></div>
+            <div style="padding: 30px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; padding-top: 10px;">
+                    <div>
+                        <div style="font-size: 24px; font-weight: 700; color: #3563E9; letter-spacing: -0.5px;">KANDHAN TRAVELS</div>
+                        <div style="font-size: 13px; color: #4A5568; margin-bottom: 6px;">Your Premium Travel Partner</div>
+                        <div style="font-size: 12px; color: #718096; max-width: 280px; line-height: 1.6;">
+                            Gandhi Nagar, Mettupalayam, Coimbatore - 641301<br>
+                            GST: 33ABJPK7328F1ZX | PAN: ABJPK7328F
+                        </div>
+                        <div style="font-size: 12px; color: #3563E9; font-weight: 600; margin-top: 5px;">
+                            Contact: +91 98765 43210
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 28px; font-weight: 800; color: #3563E9; letter-spacing: -0.5px; margin-bottom: 8px;">INVOICE</div>
+                        <div style="font-size: 14px; font-weight: 600; margin-bottom: 5px;" id="pdf-invoice-number">INV-KT-2025050001</div>
+                        <div style="font-size: 13px; color: #718096;" id="pdf-invoice-date">Date: May 9, 2025</div>
+                        <div style="font-size: 13px; color: #718096;" id="pdf-trip-date">Trip Date: May 8-9, 2025</div>
+                        <div style="display: inline-block; padding: 3px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 8px; background-color: rgba(16, 185, 129, 0.1); color: #10B981;" id="pdf-payment-status">PAID</div>
+                    </div>
+                </div>
+
+                <div style="height: 1px; background-color: #E2E8F0; margin: 20px 0;"></div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 30px;">
+                    <div style="background-color: #F7FAFC; border-radius: 10px; padding: 18px;">
+                        <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; color: #718096; margin-bottom: 10px;">BILLED TO</div>
+                        <div style="font-size: 14px; line-height: 1.6;">
+                            <strong id="pdf-customer-name" style="font-weight: 600; color: #1A202C; font-size: 15px;">Ramesh Kumar</strong><br>
+                            <span id="pdf-customer-address">123 Main Street, Coimbatore, TN</span><br>
+                            Phone: <span id="pdf-customer-phone">+91 99887 65432</span><br>
+                            Email: <span id="pdf-customer-email">ramesh@example.com</span>
+                        </div>
+                    </div>
+                    <div style="background-color: #F7FAFC; border-radius: 10px; padding: 18px;">
+                        <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; color: #718096; margin-bottom: 10px;">BANK DETAILS</div>
+                        <div style="font-size: 14px; line-height: 1.6;">
+                            <strong style="font-weight: 600; color: #1A202C; font-size: 15px;">ICICI Bank</strong><br>
+                            Account Name: Kandhan Travels<br>
+                            Account No: 123456789012<br>
+                            IFSC Code: ICIC0001234<br>
+                            Branch: Coimbatore Main
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px;">
+                    <div style="background-color: #EDF2FF; border-radius: 8px; padding: 15px; text-align: center;">
+                        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; color: #718096; margin-bottom: 5px;">VEHICLE TYPE</div>
+                        <div style="font-size: 15px; font-weight: 600; color: #3563E9;" id="pdf-vehicle-type">Toyota Innova</div>
+                    </div>
+                    <div style="background-color: #EDF2FF; border-radius: 8px; padding: 15px; text-align: center;">
+                        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; color: #718096; margin-bottom: 5px;">SEATS</div>
+                        <div style="font-size: 15px; font-weight: 600; color: #3563E9;" id="pdf-vehicle-seats">7+1</div>
+                    </div>
+                    <div style="background-color: #EDF2FF; border-radius: 8px; padding: 15px; text-align: center;">
+                        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; color: #718096; margin-bottom: 5px;">AC/NON-AC</div>
+                        <div style="font-size: 15px; font-weight: 600; color: #3563E9;" id="pdf-vehicle-ac">AC</div>
+                    </div>
+                </div>
+
+                <table id="pdf-invoice-table" style="width: 100%; border-collapse: collapse; margin-bottom: 25px; font-size: 13px;">
+                    <thead>
+                        <tr>
+                            <th style="background-color: #EDF2FF; color: #3563E9; text-align: left; padding: 12px 15px; font-weight: 600; font-size: 13px; border-top: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0; width: 5%;">#</th>
+                            <th style="background-color: #EDF2FF; color: #3563E9; text-align: left; padding: 12px 15px; font-weight: 600; font-size: 13px; border-top: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0; width: 45%;">Description</th>
+                            <th style="background-color: #EDF2FF; color: #3563E9; text-align: left; padding: 12px 15px; font-weight: 600; font-size: 13px; border-top: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0; width: 20%;">Details</th>
+                            <th style="background-color: #EDF2FF; color: #3563E9; text-align: right; padding: 12px 15px; font-weight: 600; font-size: 13px; border-top: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0; width: 15%;">Rate</th>
+                            <th style="background-color: #EDF2FF; color: #3563E9; text-align: right; padding: 12px 15px; font-weight: 600; font-size: 13px; border-top: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0; width: 15%;">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Table rows will be inserted dynamically by JavaScript -->
+                    </tbody>
+                </table>
+
+                <div style="width: 100%; display: flex; justify-content: flex-end;">
+                    <div style="width: 300px;">
+                        <div style="padding: 15px; background-color: #F7FAFC; border-radius: 10px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <div style="color: #718096; font-size: 14px;">Subtotal:</div>
+                                <div style="color: #1A202C; font-weight: 600; font-size: 14px;" id="pdf-subtotal">₹5,600.00</div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <div style="color: #718096; font-size: 14px;" id="pdf-cgst-label">CGST (2.5%):</div>
+                                <div style="color: #1A202C; font-weight: 600; font-size: 14px;" id="pdf-cgst">₹140.00</div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                                <div style="color: #718096; font-size: 14px;" id="pdf-sgst-label">SGST (2.5%):</div>
+                                <div style="color: #1A202C; font-weight: 600; font-size: 14px;" id="pdf-sgst">₹140.00</div>
+                            </div>
+                            <div style="height: 1px; background-color: #E2E8F0; margin-bottom: 15px;"></div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <div style="color: #3563E9; font-weight: 700; font-size: 16px;">TOTAL:</div>
+                                <div style="color: #3563E9; font-weight: 700; font-size: 16px;" id="pdf-total">₹5,880.00</div>
+                            </div>
+                            <div style="margin-top: 10px; font-style: italic; font-size: 12px; color: #718096;" id="pdf-amount-in-words">
+                                Rupees Five Thousand Eight Hundred Eighty Only
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <div style="width: 200px; text-align: center;">
+                            <div style="height: 1px; background-color: #E2E8F0; margin-bottom: 5px;"></div>
+                            <div style="font-size: 13px; font-weight: 600; color: #1A202C;">For Kandhan Travels</div>
+                            <div style="font-size: 12px; color: #718096;">Authorized Signature</div>
+                        </div>
+                        <div style="width: 200px; text-align: center;">
+                            <div style="height: 1px; background-color: #E2E8F0; margin-bottom: 5px;"></div>
+                            <div style="font-size: 13px; font-weight: 600; color: #1A202C;">Customer Signature</div>
+                            <div style="font-size: 12px; color: #718096;">Received With Thanks</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="position: absolute; bottom: 30px; left: 30px; right: 30px; text-align: center; font-size: 12px; color: #718096;">
+                    Thank you for choosing Kandhan Travels. We hope you enjoyed our service.
+                </div>
+            </div>
+            <div style="height: 10px; background: linear-gradient(90deg, #3563E9, #5E97FF); width: 100%; position: absolute; bottom: 0;"></div>
+
+            <!-- PDF Footer Bar -->
+            <div style="position: absolute; left: 0; right: 0; bottom: 0;">
+                <div style="background: linear-gradient(90deg, #3563E9, #5E97FF); padding: 0;">
+                    <div style="background: #EDF2FF; border-radius: 0 0 10px 10px; padding: 18px 24px 10px 24px; text-align: center;">
+                        <div style="font-size: 16px; font-weight: 700; color: #3563E9; margin-bottom: 8px;">Thank you for choosing Kandhan Travels!</div>
+                        <div style="font-size: 13px; color: #4A5568; line-height: 1.6;">
+                            +91 98765 43210 &nbsp; <span style="color: #3563E9;">sales@kandhantravels.com</span> &nbsp; www.kandhantravels.com &nbsp; @kandhantravels_official
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-bar" style="background: linear-gradient(90deg, #3563E9, #5E97FF); padding: 18px 0 0 0; margin-top: 40px; border-radius: 0 0 10px 10px; width: 100%; max-width: 800px;">
+        <div style="background: #EDF2FF; border-radius: 0 0 10px 10px; padding: 18px 24px 10px 24px; text-align: center;">
+            <div style="font-size: 16px; font-weight: 700; color: #3563E9; margin-bottom: 8px;">Thank you for choosing Kandhan Travels!</div>
+            <div style="font-size: 13px; color: #4A5568; line-height: 1.6;">
+                +91 98765 43210 &nbsp; <span style="color: #3563E9;">sales@kandhantravels.com</span> &nbsp; www.kandhantravels.com &nbsp; @kandhantravels_official
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        // Item management and calculations
+        let itemIdCounter = 5;
+        
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(amount).replace('₹', '');
+        }
+        
+        function calculateItemAmount(input) {
+            const itemRow = input.closest('.invoice-item');
+            const rate = parseFloat(itemRow.querySelector('.item-rate').value) || 0;
+            const quantity = parseFloat(itemRow.querySelector('.item-quantity').value) || 0;
+            const amount = rate * quantity;
+            itemRow.querySelector('.item-amount').value = amount.toFixed(2);
+            calculateTotals();
+        }
+        
+        function calculateTotals() {
+            let subtotal = 0;
+            document.querySelectorAll('.item-amount').forEach(item => {
+                subtotal += parseFloat(item.value) || 0;
+            });
+            
+            const cgstRate = parseFloat(document.getElementById('cgstRate').value) || 0;
+            const sgstRate = parseFloat(document.getElementById('sgstRate').value) || 0;
+            
+            const cgstAmount = subtotal * (cgstRate / 100);
+            const sgstAmount = subtotal * (sgstRate / 100);
+            const total = subtotal + cgstAmount + sgstAmount;
+            
+            document.getElementById('summary-subtotal').textContent = '₹' + formatCurrency(subtotal);
+            document.getElementById('summary-cgst').textContent = '₹' + formatCurrency(cgstAmount);
+            document.getElementById('summary-sgst').textContent = '₹' + formatCurrency(sgstAmount);
+            document.getElementById('summary-total').textContent = '₹' + formatCurrency(total);
+            
+            // Update amount in words
+            document.getElementById('amount-in-words').textContent = 'Rupees ' + numberToWords(total) + ' Only';
+        }
+        
+        // Number to words conversion
+        function convertNumberToWords(num) {
+            let words = '';
+            let digits = num.toString().split('');
+            let digitsLength = digits.length;
+            
+            if (digitsLength > 9) {
+                return 'More than Billion';
+            }
+            
+            const segments = [
+                '', 
+                'Hundred', 
+                'Thousand', 
+                'Thousand', 
+                'Lakh', 
+                'Lakh', 
+                'Crore', 
+                'Crore'
+            ];
+            
+            let d = 0;
+            let i = digitsLength - 1;
+            
+            while (i >= 0) {
+                switch (d) {
+                    case 0:
+                        words = formatOther(+digits[i], 0, '') + words;
+                        break;
+                    case 1:
+                        words = formatTenth(+digits[i], +digits[i + 1]) + words;
+                        break;
+                    case 2:
+                        words = formatOther(+digits[i], +digits[i + 1], segments[d]) + words;
+                        break;
+                    case 3:
+                    case 5:
+                    case 7:
+                        words = formatOther(+digits[i], +digits[i - 1], segments[d]) + words;
+                        break;
+                    case 4:
+                    case 6:
+                    case 8:
+                        words = formatTenth(+digits[i], +digits[i + 1]) + words;
+                        break;
+                }
+                i--;
+                d++;
+            }
+            
+            return words.trim();
+        }
+
+        function numberToWords(num) {
+            const single = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+            const double = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+            const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+            const formatTenth = (digit, prev) => {
+                return 0 == digit ? '' : ' ' + (1 == digit ? double[prev] : tens[digit]);
+            };
+            const formatOther = (digit, next, denom) => {
+                return (0 != digit && 1 != next ? ' ' + single[digit] : '') + (0 != next || digit > 0 ? ' ' + denom : '');
+            };
+            
+            let str = '';
+            let rupees = Math.floor(num);
+            let paise = Math.round((num - rupees) * 100);
+            
+            str += rupees > 0 ? convertNumberToWords(rupees) : '';
+            
+            if (paise > 0) {
+                str += ' and ' + convertNumberToWords(paise) + ' Paise';
+            }
+            
+            return str;
+        }
+        
+        // Add and remove invoice items
+        document.getElementById('addItem').addEventListener('click', function() {
+            const itemsContainer = document.getElementById('invoiceItems');
+            const newItem = document.createElement('div');
+            newItem.className = 'invoice-item';
+            newItem.dataset.id = itemIdCounter++;
+            
+            newItem.innerHTML = `
+                <div style="flex: 3">
+                    <div class="form-group">
+                        <label>Description</label>
+                        <input type="text" class="form-control item-desc" value="">
+                    </div>
+                </div>
+                <div style="flex: 2">
+                    <div class="form-group">
+                        <label>Details</label>
+                        <input type="text" class="form-control item-details" value="">
+                    </div>
+                </div>
+                <div style="flex: 1">
+                    <div class="form-group">
+                        <label>Rate (₹)</label>
+                        <input type="number" class="form-control item-rate" value="0.00" oninput="calculateItemAmount(this)">
+                    </div>
+                </div>
+                <div style="flex: 1">
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" class="form-control item-quantity" value="1" oninput="calculateItemAmount(this)">
+                    </div>
+                </div>
+                <div style="flex: 1">
+                    <div class="form-group">
+                        <label>Amount (₹)</label>
+                        <input type="number" class="form-control item-amount" value="0.00" readonly>
+                    </div>
+                </div>
+                <button class="remove-item">×</button>
+            `;
+            
+            itemsContainer.appendChild(newItem);
+            attachRemoveItemEvents();
+        });
+        
+        function attachRemoveItemEvents() {
+            document.querySelectorAll('.remove-item').forEach(button => {
+                button.removeEventListener('click', removeItemHandler);
+                button.addEventListener('click', removeItemHandler);
+            });
+        }
+        
+        function removeItemHandler() {
+            if (document.querySelectorAll('.invoice-item').length > 1) {
+                this.closest('.invoice-item').remove();
+                calculateTotals();
+            }
+        }
+        
+        // Initialize events
+        document.addEventListener('DOMContentLoaded', function() {
+            attachRemoveItemEvents();
+            calculateTotals();
+            
+            document.querySelectorAll('.item-rate, .item-quantity, .item-amount').forEach(input => {
+                input.addEventListener('input', function() {
+                    if (this.classList.contains('item-amount')) {
+                        calculateTotals();
+                    } else {
+                        calculateItemAmount(this);
+                    }
+                });
+            });
+        });
+        
+        // PDF Generation
+        document.getElementById('downloadInvoice').addEventListener('click', function() {
+            // Update PDF template with form values
+            document.getElementById('pdf-invoice-number').textContent = document.getElementById('invoiceNumber').value;
+            document.getElementById('pdf-invoice-date').textContent = 'Date: ' + document.getElementById('invoiceDate').value;
+            document.getElementById('pdf-trip-date').textContent = 'Trip Date: ' + document.getElementById('tripDate').value;
+            document.getElementById('pdf-payment-status').textContent = document.getElementById('paymentStatus').value;
+            
+            document.getElementById('pdf-customer-name').textContent = document.getElementById('customerName').value;
+            document.getElementById('pdf-customer-address').textContent = document.getElementById('customerAddress').value;
+            document.getElementById('pdf-customer-phone').textContent = document.getElementById('customerPhone').value;
+            document.getElementById('pdf-customer-email').textContent = document.getElementById('customerEmail').value;
+            
+            document.getElementById('pdf-vehicle-type').textContent = document.getElementById('vehicleType').value;
+            document.getElementById('pdf-vehicle-seats').textContent = document.getElementById('vehicleSeats').value;
+            document.getElementById('pdf-vehicle-ac').textContent = document.getElementById('vehicleAC').value;
+            
+            // Create invoice table rows
+            const tableBody = document.querySelector('#pdf-invoice-table tbody');
+            tableBody.innerHTML = '';
+            
+            const items = document.querySelectorAll('.invoice-item');
+            items.forEach((item, index) => {
+                const description = item.querySelector('.item-desc').value;
+                const details = item.querySelector('.item-details').value;
+                const rate = parseFloat(item.querySelector('.item-rate').value) || 0;
+                const quantity = parseFloat(item.querySelector('.item-quantity').value) || 0;
+                const amount = parseFloat(item.querySelector('.item-amount').value) || 0;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td style="padding: 12px 15px; border-bottom: 1px solid #E2E8F0; color: #4A5568; font-size: 13px;">${index + 1}</td>
+                    <td style="padding: 12px 15px; border-bottom: 1px solid #E2E8F0; color: #1A202C; font-weight: 500; font-size: 13px;">${description}</td>
+                    <td style="padding: 12px 15px; border-bottom: 1px solid #E2E8F0; color: #4A5568; font-size: 13px;">${details}</td>
+                    <td style="padding: 12px 15px; border-bottom: 1px solid #E2E8F0; color: #4A5568; font-size: 13px; text-align: right;">₹${formatCurrency(rate)}</td>
+                    <td style="padding: 12px 15px; border-bottom: 1px solid #E2E8F0; color: #1A202C; font-weight: 600; font-size: 13px; text-align: right;">₹${formatCurrency(amount)}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Update totals
+            const subtotal = document.getElementById('summary-subtotal').textContent;
+            const cgst = document.getElementById('summary-cgst').textContent;
+            const cgstRate = document.getElementById('cgstRate').value;
+            const sgst = document.getElementById('summary-sgst').textContent;
+            const sgstRate = document.getElementById('sgstRate').value;
+            const total = document.getElementById('summary-total').textContent;
+            const amountInWords = document.getElementById('amount-in-words').textContent;
+            
+            document.getElementById('pdf-subtotal').textContent = subtotal;
+            document.getElementById('pdf-cgst-label').textContent = `CGST (${cgstRate}%):`;
+            document.getElementById('pdf-cgst').textContent = cgst;
+            document.getElementById('pdf-sgst-label').textContent = `SGST (${sgstRate}%):`;
+            document.getElementById('pdf-sgst').textContent = sgst;
+            document.getElementById('pdf-total').textContent = total;
+            document.getElementById('pdf-amount-in-words').textContent = amountInWords;
+            
+            // Generate PDF
+            const element = document.getElementById('invoicePage');
+            element.style.display = 'block';
+            
+            const { jsPDF } = window.jspdf;
+            
+            html2canvas(element.firstElementChild, {
+                scale: 2,
+                useCORS: true,
+                scrollX: 0, 
+                scrollY: 0
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pdfWidth = 210;
+                const pdfHeight = canvas.height * pdfWidth / canvas.width;
+                
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save('Kandhan_Travels_Invoice_' + document.getElementById('invoiceNumber').value + '.pdf');
+                
+                element.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
